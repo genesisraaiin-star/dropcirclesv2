@@ -118,7 +118,7 @@ export default function Home() {
         <div className="footer">
           <Link href="/about" className="footer-link">About →</Link>
           <div className="footer-sep"></div>
-          <button className="footer-link" type="button">Already approved? Sign in</button>
+          <a href="/signin" className="footer-link">Already approved? Sign in</a>
         </div>
       </div>
     </>
