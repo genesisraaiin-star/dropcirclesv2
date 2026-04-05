@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno'
+// 🚨 FIX 1: Native Deno npm import (No more microtask crashes!)
+import Stripe from 'npm:stripe@^14.0.0'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -26,7 +27,7 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: '2022-11-15',
-      httpClient: Stripe.createFetchHttpClient(),
+      httpClient: Stripe.createFetchHttpClient(), // Crucial for Deno
     })
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
@@ -35,10 +36,11 @@ serve(async (req) => {
       type: 'express',
     })
 
+    // 🚨 FIX 2: Target the correct 'user_id' column in your artists table
     const { error: dbError } = await supabaseAdmin
       .from('artists')
       .update({ stripe_account_id: account.id })
-      .eq('id', userId)
+      .eq('user_id', userId) 
 
     if (dbError) throw new Error(`Database error: ${dbError.message}`)
 
