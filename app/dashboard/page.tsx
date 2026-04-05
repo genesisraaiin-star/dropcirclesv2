@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export default async function Dashboard() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,11 +17,9 @@ export default async function Dashboard() {
     }
   )
 
-  // Auth gate — if not logged in, send to sign in
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/signin')
 
-  // Load artist profile if it exists
   const { data: artist } = await supabase
     .from('artists')
     .select('*')
@@ -56,7 +54,7 @@ export default async function Dashboard() {
         .signout-btn{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(10,10,10,0.25);background:none;border:none;cursor:pointer;padding:0;transition:color 0.15s;}
         .signout-btn:hover{color:var(--ink);}
         .main{background:var(--bg);padding:44px 52px;}
-        .page-header{margin-bottom:44px;padding-bottom:24px;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;justify-content:space-between;}
+        .page-header{margin-bottom:44px;padding-bottom:24px;border-bottom:1px solid var(--line);}
         .page-title{font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.5px;line-height:1;color:var(--ink);}
         .page-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-top:8px;}
         .setup-card{background:var(--white);border:1px solid var(--line);border-radius:2px;padding:36px;max-width:520px;}
@@ -83,13 +81,11 @@ export default async function Dashboard() {
             </svg>
             <span className="sidebar-wordmark">DropCircles</span>
           </div>
-
           <div className="artist-block">
             <div className="artist-avatar">{initials}</div>
             <div className="artist-name">{artist?.name ?? user.email}</div>
             <div className="artist-tag">Visionary</div>
           </div>
-
           <div className="nav-links">
             <a className="nav-link active" href="/dashboard">Drops</a>
             <a className="nav-link" href="/dashboard/circles">Circles</a>
@@ -97,45 +93,27 @@ export default async function Dashboard() {
             <a className="nav-link" href="/dashboard/fans">Fans</a>
             <a className="nav-link" href="/dashboard/settings">Settings</a>
           </div>
-
           <div className="sidebar-footer">
             <form action="/auth/signout" method="post">
               <button className="signout-btn" type="submit">Sign out</button>
             </form>
           </div>
         </div>
-
         <div className="main">
           <div className="page-header">
-            <div>
-              <div className="page-title">Welcome.</div>
-              <div className="page-sub">You're inside the vault — let's set up your circles</div>
-            </div>
+            <div className="page-title">Welcome.</div>
+            <div className="page-sub">You're inside the vault — let's set up your circles</div>
           </div>
-
           <div className="setup-card">
             <div className="setup-label">Getting started</div>
             <div className="setup-title">Three steps to your first drop.</div>
-            <div className="setup-sub">
-              Your dashboard is ready. Complete these steps to start receiving fan payments before your music goes public.
-            </div>
+            <div className="setup-sub">Your dashboard is ready. Complete these steps to start receiving fan payments before your music goes public.</div>
             <div className="setup-steps">
-              <div className="setup-step">
-                <div className="step-num">1</div>
-                <span>Complete your artist profile — name, bio, genre</span>
-              </div>
-              <div className="setup-step">
-                <div className="step-num">2</div>
-                <span>Connect Stripe to receive direct fan payments</span>
-              </div>
-              <div className="setup-step">
-                <div className="step-num">3</div>
-                <span>Upload your first drop and set your circle pricing</span>
-              </div>
+              <div className="setup-step"><div className="step-num">1</div><span>Complete your artist profile — name, bio, genre</span></div>
+              <div className="setup-step"><div className="step-num">2</div><span>Connect Stripe to receive direct fan payments</span></div>
+              <div className="setup-step"><div className="step-num">3</div><span>Upload your first drop and set your circle pricing</span></div>
             </div>
-            <a href="/dashboard/onboarding" className="setup-btn">
-              Start setup <span className="arrow">→</span>
-            </a>
+            <a href="/dashboard/onboarding" className="setup-btn">Start setup <span className="arrow">→</span></a>
           </div>
         </div>
       </div>
