@@ -21,16 +21,38 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  // Handle PKCE flow (code param)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return NextResponse.redirect(`${origin}/dashboard`)
+    if (!error) {
+      // Check if artist has completed onboarding
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: artist } = await supabase
+          .from('artists')
+          .select('name')
+          .eq('user_id', user.id)
+          .single()
+        // No name = hasn't onboarded yet
+        if (!artist?.name) return NextResponse.redirect(`${origin}/dashboard/onboarding`)
+      }
+      return NextResponse.redirect(`${origin}/dashboard`)
+    }
   }
 
-  // Handle magic link / OTP flow (token_hash param)
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as any })
-    if (!error) return NextResponse.redirect(`${origin}/dashboard`)
+    if (!error) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: artist } = await supabase
+          .from('artists')
+          .select('name')
+          .eq('user_id', user.id)
+          .single()
+        if (!artist?.name) return NextResponse.redirect(`${origin}/dashboard/onboarding`)
+      }
+      return NextResponse.redirect(`${origin}/dashboard`)
+    }
   }
 
   return NextResponse.redirect(`${origin}/signin?error=auth_failed`)
