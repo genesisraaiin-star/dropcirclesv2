@@ -5,31 +5,34 @@ import Link from 'next/link'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError('')
-    
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address.')
+      return
+    }
+    setLoading(true)
     const supabase = createClient()
-    
-    // 🚨 THE DEV BACKDOOR: Bypassing magic links entirely
-    // This ignores whatever email you type and logs you into the VIP test account
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: 'test@dropcircles.com',
-      password: 'Password123!',
+    const { error: authError } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
-
     if (authError) {
-      setError("Backdoor failed: " + authError.message + " (Did you create the user in Supabase?)")
+      setError(authError.message)
       setLoading(false)
       return
     }
-
-    // 🏎️ Escort them directly into the vault
-    window.location.href = '/dashboard/onboarding'
+    setSent(true)
+    setLoading(false)
   }
 
   return (
@@ -44,15 +47,9 @@ export default function SignIn() {
         .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;position:relative;}
         .logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:52px;}
         .wordmark{font-family:var(--sans);font-weight:300;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--white);opacity:0.45;}
-        .circle-mark{position:relative;width:56px;height:56px;}
-        .ring{position:absolute;border-radius:50%;border:1px solid;}
         @keyframes slowSpin{100%{transform:rotate(360deg);}}
-        @keyframes corePulse{0%,100%{box-shadow:0 0 0px rgba(0,194,212,0);}33%{box-shadow:0 0 10px rgba(0,194,212,0.5);}}
-        @media(prefers-reduced-motion:no-preference){.r1{animation:slowSpin 9s linear infinite;}.r2{animation:slowSpin 6s linear infinite reverse;}}
-        .r1{width:56px;height:56px;top:0;left:0;border-color:rgba(245,242,238,0.1);}
-        .r2{width:37px;height:37px;top:9.5px;left:9.5px;border-color:rgba(245,242,238,0.18);}
-        .r3{width:20px;height:20px;top:18px;left:18px;border-color:rgba(245,242,238,0.28);}
-        .r-core{width:7px;height:7px;top:24.5px;left:24.5px;background:var(--cyan);border-color:var(--cyan);animation:corePulse 3s cubic-bezier(0.25,0.1,0.25,1) infinite;}
+        @keyframes corePulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
+        .logo-cyan{animation:corePulse 3s ease-in-out infinite;}
         .label{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(245,242,238,0.3);margin-bottom:20px;}
         .title{font-family:var(--serif);font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-1px;color:var(--white);font-weight:400;text-align:center;margin-bottom:40px;}
         .form-wrap{width:100%;max-width:320px;border:1px solid var(--line);border-radius:2px;overflow:hidden;}
@@ -66,6 +63,11 @@ export default function SignIn() {
         .arrow{display:inline-block;transition:transform 0.2s ease;}
         .submit-btn:hover .arrow{transform:translateX(4px);}
         .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+        .sent-wrap{text-align:center;max-width:320px;}
+        .sent-title{font-family:var(--serif);font-size:28px;color:var(--white);margin-bottom:10px;font-weight:400;}
+        .sent-sub{font-size:12px;color:rgba(245,242,238,0.4);font-weight:300;line-height:1.7;}
+        .sent-sub strong{color:rgba(245,242,238,0.7);}
+        .sent-note{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,242,238,0.2);margin-top:20px;}
         .footer{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;white-space:nowrap;}
         .footer-link{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,242,238,0.2);text-decoration:none;transition:color 0.2s;}
         .footer-link:hover{color:rgba(245,242,238,0.55);}
@@ -74,37 +76,50 @@ export default function SignIn() {
 
       <div className="page">
         <div className="logo-wrap">
-          <div className="circle-mark">
-            <div className="ring r1"></div>
-            <div className="ring r2"></div>
-            <div className="ring r3"></div>
-            <div className="ring r-core"></div>
-          </div>
+          <svg width="72" height="46" viewBox="0 0 72 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="23" r="22" stroke="rgba(245,242,238,0.7)" strokeWidth="1.2"/>
+            <circle cx="47" cy="23" r="22" stroke="rgba(245,242,238,0.7)" strokeWidth="1.2"/>
+            <circle cx="36" cy="23" r="3" fill="#00c2d4" className="logo-cyan"/>
+          </svg>
           <div className="wordmark">DropCircles</div>
         </div>
 
         <div className="label">Visionary access</div>
 
-        <h1 className="title">Enter the vault.</h1>
-        <form onSubmit={handleSubmit} noValidate style={{width:'100%',display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
-          <div className="form-wrap">
-            <label className="sr-only" htmlFor="f-email">Email address</label>
-            <input
-              className="fi"
-              type="email"
-              id="f-email"
-              placeholder="Dev Bypass Active (Type anything)"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              autoFocus
-            />
+        {!sent ? (
+          <>
+            <h1 className="title">Enter the vault.</h1>
+            <form onSubmit={handleSubmit} noValidate style={{width:'100%',display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
+              <div className="form-wrap">
+                <label className="sr-only" htmlFor="f-email">Email address</label>
+                <input
+                  className="fi"
+                  type="email"
+                  id="f-email"
+                  placeholder="Your email address"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  autoComplete="email"
+                  autoFocus
+                />
+              </div>
+              {error && <div className="error-msg" role="alert">{error}</div>}
+              <button className="submit-btn" type="submit" disabled={loading}>
+                <span>{loading ? 'Sending link...' : 'Send magic link'}</span>
+                <span className="arrow" aria-hidden="true">→</span>
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="sent-wrap" role="status">
+            <div className="sent-title">Check your email.</div>
+            <div className="sent-sub">
+              We sent a link to <strong>{email}</strong>.<br/>
+              Click it to enter your dashboard. No password needed.
+            </div>
+            <div className="sent-note">Link expires in 1 hour</div>
           </div>
-          {error && <div className="error-msg" role="alert">{error}</div>}
-          <button className="submit-btn" type="submit" disabled={loading}>
-            <span>{loading ? 'Breaching...' : 'DEV BYPASS LOGIN'}</span>
-            <span className="arrow" aria-hidden="true">→</span>
-          </button>
-        </form>
+        )}
 
         <div className="footer">
           <Link href="/" className="footer-link">← Back</Link>
