@@ -6,6 +6,7 @@ export default function Onboarding() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [stripeLoading, setStripeLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     name: '',
@@ -43,6 +44,42 @@ export default function Onboarding() {
     setLoading(false)
   }
 
+  // NEW FUNCTION: Calls our deployed Edge Function to get the Stripe URL
+  async function handleStripeConnect() {
+    setStripeLoading(true)
+    setError('')
+    try {
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/signin'); return }
+
+      // Invoke the Edge Function we deployed earlier
+      const { data, error: functionError } = await supabase.functions.invoke('create-stripe-account', {
+        body: { userId: user.id }
+      })
+
+      if (functionError || !data?.url) {
+        console.error("Stripe Error:", functionError)
+        setError('Failed to connect to Stripe. Please try again.')
+        setStripeLoading(false)
+        return
+      }
+
+      // Redirect the user to Stripe's secure hosted onboarding
+      window.location.href = data.url
+
+    } catch (err) {
+      console.error("Connection Error:", err)
+      setError('Something went wrong. Please try again.')
+      setStripeLoading(false)
+    }
+  }
+
   return (
     <>
       <style>{`
@@ -73,7 +110,7 @@ export default function Onboarding() {
         .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
         .arrow{display:inline-block;transition:transform 0.2s ease;}
         .submit-btn:hover .arrow{transform:translateX(3px);}
-        .error-msg{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:#c0392b;padding:0 36px 16px;}
+        .error-msg{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:#c0392b;padding:0 36px 16px;text-align:center;}
         .progress{height:2px;background:var(--line);width:100%;}
         .progress-fill{height:2px;background:var(--cyan);transition:width 0.4s ease;}
 
@@ -85,6 +122,7 @@ export default function Onboarding() {
         .done-actions{display:flex;flex-direction:column;gap:10px;}
         .primary-btn{padding:13px 24px;background:var(--ink);color:var(--white);border:none;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background 0.15s;text-decoration:none;display:flex;justify-content:space-between;align-items:center;}
         .primary-btn:hover{background:#1a1a1a;}
+        .primary-btn:disabled{opacity:0.5;cursor:not-allowed;}
         .secondary-btn{padding:13px 24px;background:transparent;color:var(--ink2);border:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.15s;text-decoration:none;display:flex;justify-content:space-between;align-items:center;}
         .secondary-btn:hover{border-color:var(--ink);color:var(--ink);}
         .later-note{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-top:16px;}
@@ -150,15 +188,22 @@ export default function Onboarding() {
               </div>
               <div className="done-title">Vault is ready.</div>
               <div className="done-sub">
-                Your profile is set. Next — connect Stripe so fans can pay you directly, or upload your first drop now.
+                Your profile is set. Next — connect your bank via Stripe so you can receive direct payouts from fans.
               </div>
+              
+              {error && <div className="error-msg">{error}</div>}
+
               <div className="done-actions">
-                <a href="/dashboard" className="primary-btn">
-                  <span>Go to dashboard</span>
+                <button 
+                  onClick={handleStripeConnect} 
+                  disabled={stripeLoading} 
+                  className="primary-btn"
+                >
+                  <span>{stripeLoading ? 'Connecting...' : 'Connect Stripe Account'}</span>
                   <span>→</span>
-                </a>
+                </button>
                 <a href="/dashboard/settings" className="secondary-btn">
-                  <span>Complete your profile</span>
+                  <span>I'll do this later</span>
                   <span>→</span>
                 </a>
               </div>

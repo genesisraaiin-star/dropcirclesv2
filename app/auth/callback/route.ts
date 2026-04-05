@@ -20,7 +20,9 @@ export async function GET(request: NextRequest) {
       }
     )
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return NextResponse.redirect(`${origin}/dashboard`)
+    
+    // 👇 THIS IS THE FIX: Escort them directly to the setup vault
+    if (!error) return NextResponse.redirect(`${origin}/dashboard/onboarding`)
   }
 
   return NextResponse.redirect(`${origin}/signin?error=auth_failed`)
