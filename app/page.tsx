@@ -43,7 +43,7 @@ export default function Home() {
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
         .hero-title{font-family:var(--serif);font-size:clamp(48px,8vw,110px);line-height:1.05;letter-spacing:-2px;color:var(--white);font-weight:400;}
         .hero-title em{font-style:italic;color:rgba(245,242,238,0.4);}
-        .hero-sub{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:32px;max-width:400px;line-height:1.6;}
+        .hero-sub{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:32px;max-width:480px;line-height:1.6;}
         .manifesto-moment{border-bottom:1px solid var(--line);}
         .you-block{padding:72px 60px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
         .you-col{border-right:1px solid var(--line);padding-right:40px;}
@@ -164,7 +164,7 @@ export default function Home() {
       <div className="hero-black grain">
         <div className="invite-badge">Ecosystem locked · Beta</div>
         <h1 className="hero-title">No platform.<br/>No permission.<br/><em>No performance.</em></h1>
-        <div className="hero-sub">The ecosystem is currently locked. 100 founding Visionaries only. Your music, their ears, first.</div>
+        <div className="hero-sub">The ecosystem is currently locked. Experience infinite greatness — here, today.</div>
       </div>
 
       <div className="manifesto-moment grain">
@@ -179,7 +179,7 @@ export default function Home() {
           </div>
           <div className="you-col">
             <div className="you-verb">You collect.</div>
-            <div className="you-desc">Money moves directly to your account — before the world hears a note. We take 5%. That's it. No monthly fee. No permission needed.</div>
+            <div className="you-desc">Money moves directly to your vault. No waiting on distributors. No permission needed.</div>
           </div>
         </div>
       </div>
@@ -187,7 +187,7 @@ export default function Home() {
       <div className="manifesto-strip grain">
         <div className="m-col">
           <div className="m-num">01</div>
-          <div className="m-text">A closed-circuit infrastructure. No algorithms. No platform tax. No gatekeepers.</div>
+          <div className="m-text">Three circles. Inner Circle, Wave, Street. You control who gets in, when they get in, and what they pay.</div>
         </div>
         <div className="m-col">
           <div className="m-num">02</div>
@@ -204,21 +204,37 @@ export default function Home() {
           <div className="col-l">
             <div>
               <h2 className="col-hed">Your music,<br/><em>their ears,</em><br/>first.</h2>
-              <p className="col-sub">Every platform between you and your fan is a toll booth. DropCircles removes the toll. Your superfans pay you directly — before anyone else hears the music. We take 5%. That's it. No monthly fee. No algorithm deciding your reach.</p>
+              <p className="col-sub">Every platform between you and your fan is a toll booth. DropCircles removes the toll. Your superfans pay you directly. Pure, unfiltered patronage.</p>
               <div className="lock-bar">
                 <span>Beta · 100 Visionaries total</span>
                 <span><span className="lock-spots">100 spots</span> · first come, first in</span>
               </div>
+
               {!submitted ? (
                 <form onSubmit={handleSubmit} noValidate>
                   <div className="form-wrap">
                     <div className="f-row-2">
-                      <div><label className="sr-only" htmlFor="f-name">Artist name</label><input className="fi fi-r" type="text" id="f-name" placeholder="Artist name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} autoComplete="name"/></div>
-                      <div><label className="sr-only" htmlFor="f-genre">Genre</label><input className="fi" type="text" id="f-genre" placeholder="Genre" value={form.genre} onChange={e => setForm({...form, genre: e.target.value})}/></div>
+                      <div>
+                        <label className="sr-only" htmlFor="f-name">Artist name</label>
+                        <input className="fi fi-r" type="text" id="f-name" placeholder="Artist name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} autoComplete="name"/>
+                      </div>
+                      <div>
+                        <label className="sr-only" htmlFor="f-genre">Genre</label>
+                        <input className="fi" type="text" id="f-genre" placeholder="Genre" value={form.genre} onChange={e => setForm({...form, genre: e.target.value})}/>
+                      </div>
                     </div>
-                    <div><label className="sr-only" htmlFor="f-email">Email address</label><input className="fi" type="email" id="f-email" placeholder="Email address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} autoComplete="email"/></div>
-                    <div><label className="sr-only" htmlFor="f-handle">Social handle</label><input className="fi" type="text" id="f-handle" placeholder="Instagram or SoundCloud handle" value={form.handle} onChange={e => setForm({...form, handle: e.target.value})}/></div>
-                    <div><label className="sr-only" htmlFor="f-city">City</label><input className="fi fi-last" type="text" id="f-city" placeholder="City" value={form.city} onChange={e => setForm({...form, city: e.target.value})} autoComplete="address-level2"/></div>
+                    <div>
+                      <label className="sr-only" htmlFor="f-email">Email address</label>
+                      <input className="fi" type="email" id="f-email" placeholder="Email address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} autoComplete="email"/>
+                    </div>
+                    <div>
+                      <label className="sr-only" htmlFor="f-handle">Social handle</label>
+                      <input className="fi" type="text" id="f-handle" placeholder="Instagram or SoundCloud handle" value={form.handle} onChange={e => setForm({...form, handle: e.target.value})}/>
+                    </div>
+                    <div>
+                      <label className="sr-only" htmlFor="f-city">City</label>
+                      <input className="fi fi-last" type="text" id="f-city" placeholder="City" value={form.city} onChange={e => setForm({...form, city: e.target.value})} autoComplete="address-level2"/>
+                    </div>
                   </div>
                   {error && <div className="error-msg" role="alert">{error}</div>}
                   <button className="submit-btn" type="submit" disabled={loading}>
@@ -228,20 +244,26 @@ export default function Home() {
                 </form>
               ) : (
                 <div className="success-block" role="status">
-                  <div className="sb-check" aria-hidden="true"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1 4.5 3.5 7 8 1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
+                  <div className="sb-check" aria-hidden="true">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1 4.5 3.5 7 8 1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  </div>
                   <div className="sb-title">You're in the vault.</div>
                   <div className="sb-sub">We'll reach out to <strong>{form.email}</strong> personally when your spot opens. No bulk invites. One artist at a time.</div>
                   <div className="sb-manifesto">Experience infinite greatness — here, today.</div>
                 </div>
               )}
+
               <button className="sign-in-btn" type="button">Already approved? Sign in →</button>
             </div>
           </div>
+
           <div className="col-r">
             <div className="sec-label">The circle structure</div>
             <div className="circle-vis" aria-hidden="true">
-              <div className="ring r1"></div><div className="ring r2"></div>
-              <div className="ring r3"></div><div className="ring r-core"></div>
+              <div className="ring r1"></div>
+              <div className="ring r2"></div>
+              <div className="ring r3"></div>
+              <div className="ring r-core"></div>
               <div className="rl rl-1">Street — free</div>
               <div className="rl rl-2">Wave — 48hr</div>
               <div className="rl rl-3">Inner Circle</div>
@@ -257,12 +279,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+
         <div className="compare">
           <div className="compare-label">Platform comparison — what you actually keep per $1 earned</div>
           <div className="table-outer">
             <div className="table-wrap">
               <div className="t-head">
-                <div className="th">Platform</div><div className="th">Model</div><div className="th">Their cut</div><div className="th">You keep</div>
+                <div className="th">Platform</div>
+                <div className="th">Model</div>
+                <div className="th">Their cut</div>
+                <div className="th">You keep</div>
               </div>
               <div className="div-label">Streaming — paid per play</div>
               <div className="t-row"><div className="td td-p">Spotify</div><div className="td td-m">Per stream · algorithmic reach</div><div className="td mono red">$0.003 / stream</div><div className="td mono red">333 streams = $1</div></div>
