@@ -44,20 +44,13 @@ export default function Home() {
         body{background-color:var(--black);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
         .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;position:relative;}
-        .logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:48px;}
+        .logo-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:48px;}
         .wordmark{font-family:var(--sans);font-weight:300;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--white);opacity:0.45;}
-        .circle-mark{position:relative;width:72px;height:72px;}
-        .ring{position:absolute;border-radius:50%;border:1px solid;}
-        @keyframes slowSpin{100%{transform:rotate(360deg);}}
-        @keyframes corePulse{0%,100%{box-shadow:0 0 0px rgba(0,194,212,0);}33%{box-shadow:0 0 10px rgba(0,194,212,0.5);}}
-        @media(prefers-reduced-motion:no-preference){.r1{animation:slowSpin 9s linear infinite;}.r2{animation:slowSpin 6s linear infinite reverse;}}
-        .r1{width:72px;height:72px;top:0;left:0;border-color:rgba(245,242,238,0.1);}
-        .r2{width:48px;height:48px;top:12px;left:12px;border-color:rgba(245,242,238,0.18);}
-        .r3{width:26px;height:26px;top:23px;left:23px;border-color:rgba(245,242,238,0.28);}
-        .r-core{width:9px;height:9px;top:31.5px;left:31.5px;background:var(--cyan);border-color:var(--cyan);animation:corePulse 3s cubic-bezier(0.25,0.1,0.25,1) infinite;}
         .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid rgba(0,194,212,0.25);border-radius:100px;font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:36px;}
         .badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cyan);flex-shrink:0;animation:blink 2s ease-in-out infinite;}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.1}}
+        @keyframes corePulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
+        .logo-cyan{animation:corePulse 3s ease-in-out infinite;}
         .title{font-family:var(--serif);font-size:clamp(36px,6vw,72px);line-height:1.05;letter-spacing:-2px;color:var(--white);font-weight:400;text-align:center;margin-bottom:40px;}
         .title em{font-style:italic;color:rgba(245,242,238,0.32);}
         .form-wrap{width:100%;max-width:380px;border:1px solid var(--line);border-radius:2px;overflow:hidden;}
@@ -87,12 +80,11 @@ export default function Home() {
 
       <div className="page">
         <div className="logo-wrap">
-          <div className="circle-mark">
-            <div className="ring r1"></div>
-            <div className="ring r2"></div>
-            <div className="ring r3"></div>
-            <div className="ring r-core"></div>
-          </div>
+          <svg width="72" height="46" viewBox="0 0 72 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="23" r="22" stroke="rgba(245,242,238,0.7)" strokeWidth="1.2"/>
+            <circle cx="47" cy="23" r="22" stroke="rgba(245,242,238,0.7)" strokeWidth="1.2"/>
+            <circle cx="36" cy="23" r="3" fill="#00c2d4" className="logo-cyan"/>
+          </svg>
           <div className="wordmark">DropCircles</div>
         </div>
 
@@ -155,7 +147,7 @@ export default function Home() {
         <div className="footer">
           <Link href="/about" className="footer-link">About →</Link>
           <div className="footer-sep"></div>
-          <a href="/signin" className="footer-link">Already approved? Sign in</a>
+          <Link href="/signin" className="footer-link">Already approved? Sign in</Link>
         </div>
       </div>
     </>
