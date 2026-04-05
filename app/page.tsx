@@ -12,42 +12,15 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-
-    if (!form.name.trim()) {
-      setError('Artist name is required.')
-      return
-    }
-    if (!emailRegex.test(form.email.trim())) {
-      setError('Please enter a valid email address.')
-      return
-    }
-
+    if (!form.name.trim()) { setError('Artist name is required.'); return }
+    if (!emailRegex.test(form.email.trim())) { setError('Please enter a valid email address.'); return }
     setLoading(true)
-
     try {
       const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      const { error: dbError } = await supabase.from('waitlist').insert({
-        name: form.name.trim(),
-        email: form.email.trim(),
-        handle: form.handle.trim(),
-        genre: form.genre.trim(),
-        city: form.city.trim(),
-      })
-      if (dbError && dbError.code !== '23505') {
-        setError('Something went wrong. Please try again.')
-        setLoading(false)
-        return
-      }
-    } catch {
-      setError('Something went wrong. Please try again.')
-      setLoading(false)
-      return
-    }
-
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+      const { error: dbError } = await supabase.from('waitlist').insert({ name: form.name.trim(), email: form.email.trim(), handle: form.handle.trim(), genre: form.genre.trim(), city: form.city.trim() })
+      if (dbError && dbError.code !== '23505') { setError('Something went wrong. Please try again.'); setLoading(false); return }
+    } catch { setError('Something went wrong. Please try again.'); setLoading(false); return }
     setSubmitted(true)
     setLoading(false)
   }
@@ -57,44 +30,33 @@ export default function Home() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap');
         *{margin:0;padding:0;box-sizing:border-box;}
-        :root{
-          --black:#080808;--white:#f5f2ee;--off:#f9f8f6;
-          --cyan:#00c2d4;
-          --line:rgba(245,242,238,0.15);
-          --linelt:rgba(10,10,10,0.12);
-          --ink2:#6b6b6b;--ink3:#b0b0b0;--gray:#3a3a3a;
-          --serif:'DM Serif Display',Georgia,serif;
-          --sans:'DM Sans',system-ui,sans-serif;
-          --mono:'Space Mono',monospace;
-        }
+        :root{--black:#080808;--white:#f5f2ee;--off:#f9f8f6;--cyan:#00c2d4;--line:rgba(245,242,238,0.15);--linelt:rgba(10,10,10,0.12);--ink2:#6b6b6b;--ink3:#b0b0b0;--gray:#3a3a3a;--serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--mono:'Space Mono',monospace;}
         html{background:#080808;}
-        body{background:var(--black);color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+        body{background-color:var(--black);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+        .grain{background-color:var(--black);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
         .nav{display:flex;justify-content:center;align-items:center;flex-direction:column;padding:32px 48px 24px;border-bottom:1px solid var(--line);gap:8px;}
         .wordmark{font-family:var(--sans);font-weight:300;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--white);opacity:0.6;}
-        .hero-black{background:var(--black);padding:52px 60px 60px;border-bottom:1px solid var(--line);}
-        .hero-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
-        .hero-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cyan);flex-shrink:0;animation:blink 2s ease-in-out infinite;}
+        .hero-black{padding:72px 60px 80px;border-bottom:1px solid var(--line);}
+        .invite-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid rgba(0,194,212,0.3);border-radius:100px;font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:32px;}
+        .invite-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;animation:blink 2s ease-in-out infinite;}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
-        .hero-title{font-family:var(--serif);font-size:clamp(64px,12vw,168px);line-height:0.86;letter-spacing:-3px;color:var(--white);font-weight:400;}
-        .hero-title em{font-style:italic;color:rgba(245,242,238,0.28);}
-        .hero-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:20px;}
-        .manifesto-moment{background:var(--black);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
-        .no-block{padding:64px 60px 48px;border-bottom:1px solid var(--line);}
-        .no-line{font-family:var(--serif);font-size:clamp(28px,4.5vw,60px);line-height:1.1;letter-spacing:-0.5px;color:rgba(245,242,238,0.15);font-weight:400;transition:color 0.4s ease;cursor:default;}
-        .no-line:hover{color:rgba(245,242,238,0.6);}
-        .you-block{padding:48px 60px 64px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
+        .hero-title{font-family:var(--serif);font-size:clamp(48px,8vw,110px);line-height:1.05;letter-spacing:-2px;color:var(--white);font-weight:400;}
+        .hero-title em{font-style:italic;color:rgba(245,242,238,0.4);}
+        .hero-sub{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:32px;max-width:400px;line-height:1.6;}
+        .manifesto-moment{border-bottom:1px solid var(--line);}
+        .you-block{padding:72px 60px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
         .you-col{border-right:1px solid var(--line);padding-right:40px;}
         .you-col:not(:first-child){padding-left:40px;}
         .you-col:last-child{border-right:none;padding-right:0;}
         .you-verb{font-family:var(--serif);font-size:clamp(26px,3.5vw,48px);line-height:1.1;color:var(--white);font-weight:400;margin-bottom:8px;}
-        .you-desc{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gray);line-height:1.9;margin-top:10px;}
+        .you-desc{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);line-height:1.8;margin-top:10px;}
         .manifesto-strip{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--line);}
-        .m-col{padding:24px 28px;border-right:1px solid var(--line);}
+        .m-col{padding:32px 28px;border-right:1px solid var(--line);position:relative;overflow:hidden;}
         .m-col:last-child{border-right:none;}
-        .m-num{font-family:var(--mono);font-size:9px;color:var(--cyan);font-weight:700;margin-bottom:6px;}
-        .m-text{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--gray);line-height:1.9;}
-        .light{background:#f9f8f6;color:#0a0a0a;}
+        .m-num{position:absolute;top:-10px;left:-5px;font-family:var(--serif);font-size:120px;color:rgba(245,242,238,0.03);font-weight:400;line-height:1;z-index:0;pointer-events:none;user-select:none;}
+        .m-text{position:relative;z-index:1;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);line-height:1.9;}
+        .light{background:var(--off);color:#0a0a0a;}
         .two-col{display:grid;grid-template-columns:1fr 1fr;min-height:640px;}
         .col-l{padding:52px 52px 52px 60px;border-right:1px solid var(--linelt);display:flex;flex-direction:column;justify-content:center;}
         .col-r{padding:52px 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;}
@@ -105,20 +67,21 @@ export default function Home() {
         .lock-spots{color:var(--cyan);}
         .form-wrap{border:1px solid var(--linelt);border-radius:2px;overflow:hidden;max-width:400px;}
         .f-row-2{display:grid;grid-template-columns:1fr 1fr;}
-        .fi{padding:13px 16px;border:none;border-bottom:1px solid var(--linelt);font-family:var(--sans);font-size:13px;color:#0a0a0a;background:#fff;outline:none;width:100%;font-weight:300;-webkit-appearance:none;}
-        .fi::placeholder{color:var(--ink3);}
-        .fi:focus{background:#fafaf8;}
+        .fi{padding:13px 16px;border:none;border-bottom:1px solid var(--linelt);font-family:var(--sans);font-size:13px;color:#0a0a0a;background:#fff;outline:none;width:100%;font-weight:300;-webkit-appearance:none;transition:border-color 0.3s ease,padding-left 0.3s ease;}
+        .fi::placeholder{color:var(--ink3);transition:opacity 0.3s ease,transform 0.3s ease;}
+        .fi:focus{background:#fff;border-bottom-color:#0a0a0a;padding-left:20px;}
+        .fi:focus::placeholder{opacity:0;transform:translateX(10px);}
+        .fi.err{border-bottom-color:#c0392b;}
         .fi-r{border-right:1px solid var(--linelt);}
         .fi-last{border-bottom:none;}
-        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
         .error-msg{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:#c0392b;margin-top:8px;max-width:400px;}
         .submit-btn{width:100%;max-width:400px;padding:14px 18px;background:#0a0a0a;color:#fff;border:none;font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s ease;}
         .submit-btn:hover{background:#1a1a1a;}
         .submit-btn .arrow{display:inline-block;transition:transform 0.2s ease;}
         .submit-btn:hover .arrow{transform:translateX(4px);}
         .submit-btn:disabled{opacity:0.6;cursor:not-allowed;}
-        .sign-in{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-top:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color 0.15s;background:none;border:none;padding:0;}
-        .sign-in:hover{color:#0a0a0a;}
+        .sign-in-btn{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-top:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color 0.15s;background:none;border:none;padding:0;}
+        .sign-in-btn:hover{color:#0a0a0a;}
         .success-block{max-width:400px;padding:24px;border:1px solid var(--linelt);border-radius:2px;background:#fff;}
         .sb-check{width:18px;height:18px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
         .sb-title{font-family:var(--serif);font-size:20px;color:#0a0a0a;margin-bottom:6px;}
@@ -128,19 +91,20 @@ export default function Home() {
         .circle-vis{position:relative;width:210px;height:210px;margin:0 auto 24px;}
         .ring{position:absolute;border-radius:50%;border:1px solid;}
         @keyframes slowSpin{100%{transform:rotate(360deg);}}
-        @media(prefers-reduced-motion:no-preference){
-          .r1{animation:slowSpin 60s linear infinite;}
-          .r2{animation:slowSpin 45s linear infinite reverse;}
-        }
+        @keyframes corePulse{0%,100%{box-shadow:0 0 0px rgba(0,194,212,0),inset 0 0 0px rgba(0,194,212,0);}33%{box-shadow:0 0 14px rgba(0,194,212,0.45),inset 0 0 4px rgba(0,194,212,0.2);}}
+        @media(prefers-reduced-motion:no-preference){.r1{animation:slowSpin 9s linear infinite;}.r2{animation:slowSpin 6s linear infinite reverse;}}
         .r1{width:210px;height:210px;top:0;left:0;border-color:rgba(10,10,10,0.14);}
         .r2{width:140px;height:140px;top:35px;left:35px;border-color:rgba(10,10,10,0.28);}
         .r3{width:74px;height:74px;top:68px;left:68px;border-color:rgba(10,10,10,0.5);}
-        .r-core{width:26px;height:26px;top:92px;left:92px;background:#0a0a0a;border-color:#0a0a0a;}
+        .r-core{width:26px;height:26px;top:92px;left:92px;background:#0a0a0a;border-color:#0a0a0a;animation:corePulse 3s cubic-bezier(0.25,0.1,0.25,1) infinite;}
         .rl{position:absolute;font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);white-space:nowrap;left:50%;transform:translateX(-50%);}
         .rl-1{top:-13px;}.rl-2{top:21px;color:#888;}.rl-3{top:62px;color:#0a0a0a;}
         .tier-rows{width:100%;max-width:260px;}
-        .tier-row{display:grid;grid-template-columns:1fr auto;padding:10px 0;border-bottom:1px solid var(--linelt);}
+        .tier-row{display:grid;grid-template-columns:1fr auto;padding:10px 0;border-bottom:1px solid var(--linelt);transition:padding-left 0.2s ease,border-bottom-color 0.2s ease,background-color 0.2s ease;cursor:crosshair;}
         .tier-row:last-child{border-bottom:none;}
+        .tier-row:hover:nth-child(1){padding-left:8px;background-color:#faf5e6;border-bottom-color:#e8dcb8;}
+        .tier-row:hover:nth-child(2){padding-left:8px;background-color:#fdf5f7;border-bottom-color:#f0dbe0;}
+        .tier-row:hover:nth-child(3){padding-left:8px;background-color:#f0f7f4;border-bottom-color:#dcece4;}
         .tr-name{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;}
         .tr-name.ic{color:var(--cyan);}.tr-name.wave{color:var(--ink2);}.tr-name.street{color:var(--ink3);}
         .tr-price{font-family:var(--mono);font-size:9px;color:#0a0a0a;}
@@ -148,17 +112,19 @@ export default function Home() {
         .geo-label{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
         .geo-text{font-size:11px;color:var(--ink2);font-weight:300;line-height:1.6;}
         .geo-text span{color:var(--cyan);}
-        .compare{background:#f9f8f6;padding:0 60px 52px;}
+        .compare{background:var(--off);padding:0 60px 52px;}
         .compare-label{font-family:var(--mono);font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);padding:28px 0 12px;border-bottom:1px solid var(--linelt);}
         .table-outer{overflow-x:auto;margin:16px 0;}
-        .table-wrap{width:100%;border:1px solid var(--linelt);border-radius:2px;overflow:hidden;min-width:580px;}
-        .t-head{display:grid;grid-template-columns:155px 1fr 1fr 1fr;background:#f9f8f6;border-bottom:1px solid var(--linelt);}
-        .th{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);padding:9px 13px;}
-        .t-row{display:grid;grid-template-columns:155px 1fr 1fr 1fr;border-bottom:1px solid var(--linelt);background:#fff;transition:background 0.1s;}
+        .table-wrap{width:100%;border:1px solid var(--linelt);border-radius:2px;overflow:hidden;min-width:560px;}
+        .t-head{display:grid;grid-template-columns:140px 1.5fr 1fr 1.2fr;background:var(--off);border-bottom:1px solid var(--linelt);}
+        .th{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);padding:9px 13px;display:flex;align-items:center;}
+        .th:last-child{justify-content:flex-end;}
+        .t-row{display:grid;grid-template-columns:140px 1.5fr 1fr 1.2fr;border-bottom:1px solid var(--linelt);background:#fff;transition:background 0.1s;}
         .t-row:last-child{border-bottom:none;}.t-row.dc{background:#f0fdfe;}
         .t-row:hover{background:#f6f6f4;}.t-row.dc:hover{background:#e6fbfd;}
-        .div-label{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);padding:7px 13px;background:#f9f8f6;border-bottom:1px solid var(--linelt);border-top:1px solid var(--linelt);}
+        .div-label{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);padding:7px 13px;background:var(--off);border-bottom:1px solid var(--linelt);border-top:1px solid var(--linelt);}
         .td{padding:12px 13px;font-size:12px;display:flex;align-items:center;}
+        .td:last-child{justify-content:flex-end;}
         .td-p{font-weight:500;color:#0a0a0a;}.td-p.dc{color:var(--cyan);}
         .td-m{font-size:11px;color:var(--ink2);font-weight:300;}
         .mono{font-family:var(--mono);font-size:10px;}
@@ -168,10 +134,9 @@ export default function Home() {
         .fn span:first-child{color:var(--cyan);flex-shrink:0;}
         @media(max-width:768px){
           .nav{padding:24px 20px 18px;}
-          .hero-black{padding:36px 24px 44px;}
-          .no-block{padding:44px 24px 36px;}
-          .you-block{grid-template-columns:1fr;padding:0;}
-          .you-col{border-right:none;border-bottom:1px solid var(--line);padding:32px 24px !important;}
+          .hero-black{padding:48px 24px 60px;}
+          .you-block{grid-template-columns:1fr;padding:48px 24px;gap:0;}
+          .you-col{border-right:none;border-bottom:1px solid var(--line);padding:32px 0 !important;}
           .you-col:last-child{border-bottom:none;}
           .manifesto-strip{grid-template-columns:1fr;}
           .m-col{border-right:none;border-bottom:1px solid var(--line);}
@@ -180,7 +145,6 @@ export default function Home() {
           .col-l{padding:36px 24px;border-right:none;border-bottom:1px solid var(--linelt);justify-content:flex-start;}
           .col-r{padding:36px 24px;align-items:flex-start;}
           .sec-label,.tier-rows,.geo-tease{max-width:100%;}
-          .circle-vis{margin-left:0;}
           .compare{padding:0 24px 40px;}
           .f-row-2{grid-template-columns:1fr;}
           .fi-r{border-right:none;border-bottom:1px solid var(--linelt);}
@@ -189,26 +153,21 @@ export default function Home() {
         }
       `}</style>
 
-      <nav className="nav">
+      <nav className="nav grain">
         <svg width="42" height="27" viewBox="0 0 42 27" fill="none" aria-hidden="true">
           <circle cx="14" cy="13.5" r="12.5" stroke="rgba(245,242,238,0.55)" strokeWidth="1"/>
           <circle cx="28" cy="13.5" r="12.5" stroke="rgba(245,242,238,0.55)" strokeWidth="1"/>
         </svg>
-        <div className="wordmark" aria-label="DropCircles">DropCircles</div>
+        <div className="wordmark">DropCircles</div>
       </nav>
 
-      <div className="hero-black">
-        <div className="hero-eyebrow">Ecosystem locked · Invite only · Beta</div>
-        <h1 className="hero-title">INVITE<br/><em>ONLY.</em></h1>
-        <div className="hero-sub">The ecosystem is currently locked — 100 founding Visionaries</div>
+      <div className="hero-black grain">
+        <div className="invite-badge">Ecosystem locked · Beta</div>
+        <h1 className="hero-title">No platform.<br/>No permission.<br/><em>No performance.</em></h1>
+        <div className="hero-sub">The ecosystem is currently locked. 100 founding Visionaries only. Your music, their ears, first.</div>
       </div>
 
-      <div className="manifesto-moment">
-        <div className="no-block">
-          <div className="no-line">No platform.</div>
-          <div className="no-line">No permission.</div>
-          <div className="no-line">No performance.</div>
-        </div>
+      <div className="manifesto-moment grain">
         <div className="you-block">
           <div className="you-col">
             <div className="you-verb">You create.</div>
@@ -225,10 +184,19 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="manifesto-strip">
-        <div className="m-col"><div className="m-num">[01]</div><div className="m-text">A closed-circuit infrastructure. No algorithms. No platform tax. No gatekeepers.</div></div>
-        <div className="m-col"><div className="m-num">[02]</div><div className="m-text">Direct-to-vault drops. Your superfans pay you — before the world gets access.</div></div>
-        <div className="m-col"><div className="m-num">[03]</div><div className="m-text">We take 5%. Patreon takes 12%. Bandcamp takes 15%. The math is not close.</div></div>
+      <div className="manifesto-strip grain">
+        <div className="m-col">
+          <div className="m-num">01</div>
+          <div className="m-text">A closed-circuit infrastructure. No algorithms. No platform tax. No gatekeepers.</div>
+        </div>
+        <div className="m-col">
+          <div className="m-num">02</div>
+          <div className="m-text">Direct-to-vault drops. Your superfans pay you — before the world gets access.</div>
+        </div>
+        <div className="m-col">
+          <div className="m-num">03</div>
+          <div className="m-text">We take 5%. Patreon takes 12%. Bandcamp takes 15%. The math is not close.</div>
+        </div>
       </div>
 
       <div className="light">
@@ -241,32 +209,16 @@ export default function Home() {
                 <span>Beta · 100 Visionaries total</span>
                 <span><span className="lock-spots">100 spots</span> · first come, first in</span>
               </div>
-
               {!submitted ? (
                 <form onSubmit={handleSubmit} noValidate>
                   <div className="form-wrap">
                     <div className="f-row-2">
-                      <div>
-                        <label className="sr-only" htmlFor="f-name">Artist name</label>
-                        <input className="fi fi-r" type="text" id="f-name" placeholder="e.g. Kxng Dray" value={form.name} onChange={e => setForm({...form, name: e.target.value})} autoComplete="name"/>
-                      </div>
-                      <div>
-                        <label className="sr-only" htmlFor="f-genre">Genre</label>
-                        <input className="fi" type="text" id="f-genre" placeholder="Genre" value={form.genre} onChange={e => setForm({...form, genre: e.target.value})}/>
-                      </div>
+                      <div><label className="sr-only" htmlFor="f-name">Artist name</label><input className="fi fi-r" type="text" id="f-name" placeholder="Artist name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} autoComplete="name"/></div>
+                      <div><label className="sr-only" htmlFor="f-genre">Genre</label><input className="fi" type="text" id="f-genre" placeholder="Genre" value={form.genre} onChange={e => setForm({...form, genre: e.target.value})}/></div>
                     </div>
-                    <div>
-                      <label className="sr-only" htmlFor="f-email">Email address</label>
-                      <input className="fi" type="email" id="f-email" placeholder="Email address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} autoComplete="email"/>
-                    </div>
-                    <div>
-                      <label className="sr-only" htmlFor="f-handle">Social handle</label>
-                      <input className="fi" type="text" id="f-handle" placeholder="Instagram or SoundCloud handle" value={form.handle} onChange={e => setForm({...form, handle: e.target.value})}/>
-                    </div>
-                    <div>
-                      <label className="sr-only" htmlFor="f-city">City</label>
-                      <input className="fi fi-last" type="text" id="f-city" placeholder="City" value={form.city} onChange={e => setForm({...form, city: e.target.value})} autoComplete="address-level2"/>
-                    </div>
+                    <div><label className="sr-only" htmlFor="f-email">Email address</label><input className="fi" type="email" id="f-email" placeholder="Email address" value={form.email} onChange={e => setForm({...form, email: e.target.value})} autoComplete="email"/></div>
+                    <div><label className="sr-only" htmlFor="f-handle">Social handle</label><input className="fi" type="text" id="f-handle" placeholder="Instagram or SoundCloud handle" value={form.handle} onChange={e => setForm({...form, handle: e.target.value})}/></div>
+                    <div><label className="sr-only" htmlFor="f-city">City</label><input className="fi fi-last" type="text" id="f-city" placeholder="City" value={form.city} onChange={e => setForm({...form, city: e.target.value})} autoComplete="address-level2"/></div>
                   </div>
                   {error && <div className="error-msg" role="alert">{error}</div>}
                   <button className="submit-btn" type="submit" disabled={loading}>
@@ -276,26 +228,20 @@ export default function Home() {
                 </form>
               ) : (
                 <div className="success-block" role="status">
-                  <div className="sb-check" aria-hidden="true">
-                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1 4.5 3.5 7 8 1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  </div>
+                  <div className="sb-check" aria-hidden="true"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><polyline points="1 4.5 3.5 7 8 1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
                   <div className="sb-title">You're in the vault.</div>
                   <div className="sb-sub">We'll reach out to <strong>{form.email}</strong> personally when your spot opens. No bulk invites. One artist at a time.</div>
                   <div className="sb-manifesto">Experience infinite greatness — here, today.</div>
                 </div>
               )}
-
-              <button className="sign-in" type="button">Already approved? Sign in →</button>
+              <button className="sign-in-btn" type="button">Already approved? Sign in →</button>
             </div>
           </div>
-
           <div className="col-r">
             <div className="sec-label">The circle structure</div>
             <div className="circle-vis" aria-hidden="true">
-              <div className="ring r1"></div>
-              <div className="ring r2"></div>
-              <div className="ring r3"></div>
-              <div className="ring r-core"></div>
+              <div className="ring r1"></div><div className="ring r2"></div>
+              <div className="ring r3"></div><div className="ring r-core"></div>
               <div className="rl rl-1">Street — free</div>
               <div className="rl rl-2">Wave — 48hr</div>
               <div className="rl rl-3">Inner Circle</div>
@@ -311,23 +257,22 @@ export default function Home() {
             </div>
           </div>
         </div>
-
         <div className="compare">
           <div className="compare-label">Platform comparison — what you actually keep per $1 earned</div>
           <div className="table-outer">
             <div className="table-wrap">
               <div className="t-head">
-                <div className="th">Platform</div><div className="th">Model</div><div className="th">Their cut</div><div className="th" style={{textAlign:'right'}}>You keep</div>
+                <div className="th">Platform</div><div className="th">Model</div><div className="th">Their cut</div><div className="th">You keep</div>
               </div>
               <div className="div-label">Streaming — paid per play</div>
-              <div className="t-row"><div className="td td-p">Spotify</div><div className="td td-m">Per stream · algorithmic reach</div><div className="td mono red">$0.003 / stream</div><div className="td mono red" style={{justifyContent:'flex-end'}}>333 streams = $1</div></div>
-              <div className="t-row"><div className="td td-p">YouTube</div><div className="td td-m">Per view · ad revenue share</div><div className="td mono red">$0.001–$0.008 / view</div><div className="td mono red" style={{justifyContent:'flex-end'}}>~125k views = $100</div></div>
+              <div className="t-row"><div className="td td-p">Spotify</div><div className="td td-m">Per stream · algorithmic reach</div><div className="td mono red">$0.003 / stream</div><div className="td mono red">333 streams = $1</div></div>
+              <div className="t-row"><div className="td td-p">YouTube</div><div className="td td-m">Per view · ad revenue share</div><div className="td mono red">$0.001–$0.008 / view</div><div className="td mono red">~125k views = $100</div></div>
               <div className="div-label">Fan platforms — take a % of what you earn</div>
-              <div className="t-row"><div className="td td-p">Patreon</div><div className="td td-m">Fan subscriptions · general</div><div className="td mono red">8–12%</div><div className="td mono red" style={{justifyContent:'flex-end'}}>88¢ of every $1</div></div>
-              <div className="t-row"><div className="td td-p">Bandcamp</div><div className="td td-m">Sales + subscriptions</div><div className="td mono red">15%</div><div className="td mono red" style={{justifyContent:'flex-end'}}>85¢ of every $1</div></div>
-              <div className="t-row"><div className="td td-p">SoundCloud</div><div className="td td-m">Streaming · plan required</div><div className="td mono orange">$2.50 / 1k streams</div><div className="td mono orange" style={{justifyContent:'flex-end'}}>Fan pays nothing</div></div>
+              <div className="t-row"><div className="td td-p">Patreon</div><div className="td td-m">Fan subscriptions · general</div><div className="td mono red">8–12%</div><div className="td mono red">88¢ of every $1</div></div>
+              <div className="t-row"><div className="td td-p">Bandcamp</div><div className="td td-m">Sales + subscriptions</div><div className="td mono red">15%</div><div className="td mono red">85¢ of every $1</div></div>
+              <div className="t-row"><div className="td td-p">SoundCloud</div><div className="td td-m">Streaming · plan required</div><div className="td mono orange">$2.50 / 1k streams</div><div className="td mono orange">Fan pays nothing</div></div>
               <div className="div-label">DropCircles — direct fan payments, pre-release, music-first</div>
-              <div className="t-row dc"><div className="td td-p dc">DropCircles</div><div className="td td-m">Direct · pre-release · tiered circles</div><div className="td mono cyan-t">5% only</div><div className="td mono cyan-t" style={{justifyContent:'flex-end'}}>95¢ of every $1</div></div>
+              <div className="t-row dc"><div className="td td-p dc">DropCircles</div><div className="td td-m">Direct · pre-release · tiered circles</div><div className="td mono cyan-t">5% only</div><div className="td mono cyan-t">95¢ of every $1</div></div>
             </div>
           </div>
           <div className="fn-wrap">
