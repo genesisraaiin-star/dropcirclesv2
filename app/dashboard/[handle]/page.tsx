@@ -1,172 +1,209 @@
-'use client';
+import { notFound } from 'next/navigation'
+import { createServiceClient } from '@/lib/supabase-server'
+import { DropsGrid } from './drops-grid'
 
-import { createClient } from '@/lib/supabase';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+export const revalidate = 30 // revalidate every 30s
 
-export default function CirclesDashboard() {
-  const [circles, setCircles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [artistId, setArtistId] = useState<string | null>(null);
+type Props = { params: Promise<{ handle: string }> }
 
-  useEffect(() => {
-    async function loadVault() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+export async function generateMetadata({ params }: Props) {
+  const { handle } = await params
+  const supabase = createServiceClient()
+  const { data: artist } = await supabase
+    .from('artists')
+    .select('name, bio, genre')
+    .eq('handle', handle)
+    .single()
 
-      if (!user) { setLoading(false); return; }
+  if (!artist) return { title: 'DropCircles' }
+  return {
+    title: `${artist.name} — DropCircles`,
+    description: artist.bio || `Unreleased drops from ${artist.name}`,
+  }
+}
 
-      // Step 1: get the artist record using auth user id
-      const { data: artist } = await supabase
-        .from('artists')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+export default async function StorefrontPage({ params }: Props) {
+  const { handle } = await params
+  const supabase = createServiceClient()
 
-      if (!artist) { setLoading(false); return; }
+  // Fetch artist
+  const { data: artist } = await supabase
+    .from('artists')
+    .select('id, name, handle, bio, genre, city, accent_color, instagram, twitter, spotify, website')
+    .eq('handle', handle)
+    .single()
 
-      setArtistId(artist.id);
+  if (!artist) notFound()
 
-      // Step 2: fetch circles using the artist's actual id
-      const { data, error } = await supabase
-        .from('circles')
-        .select('*')
-        .eq('artist_id', artist.id)
-        .order('created_at', { ascending: false });
+  // Fetch active circles only — filter expired server-side too
+  const now = new Date().toISOString()
+  const { data: circles } = await supabase
+    .from('circles')
+    .select('id, title, description, price, expires_at, assets, circle_tier')
+    .eq('artist_id', artist.id)
+    .eq('is_active', true)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .order('created_at', { ascending: false })
 
-      if (error) console.error('Error fetching circles:', error);
-      if (data) setCircles(data);
-      setLoading(false);
-    }
-    loadVault();
-  }, []);
+  const accent = artist.accent_color || '#00c2d4'
+  const drops = circles || []
 
-  const toggleActiveStatus = async (id: string, currentStatus: boolean) => {
-    setCircles(circles.map(c => c.id === id ? { ...c, is_active: !currentStatus } : c));
-    const supabase = createClient();
-    await supabase.from('circles').update({ is_active: !currentStatus }).eq('id', id);
-  };
-
-  const triggerSelfDestruct = async (id: string) => {
-    const expirationDate = new Date();
-    expirationDate.setHours(expirationDate.getHours() + 24);
-    const isoString = expirationDate.toISOString();
-    setCircles(circles.map(c => c.id === id ? { ...c, expires_at: isoString } : c));
-    const supabase = createClient();
-    await supabase.from('circles').update({ expires_at: isoString }).eq('id', id);
-  };
-
-  if (loading) return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center font-sans">
-      <p className="text-gray-400 text-sm font-medium tracking-widest uppercase animate-pulse">Unlocking vault...</p>
-    </div>
-  );
+  const socialLinks = [
+    { href: artist.instagram, label: 'Instagram' },
+    { href: artist.twitter, label: 'X' },
+    { href: artist.spotify, label: 'Spotify' },
+    { href: artist.website, label: 'Web' },
+  ].filter(s => s.href)
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-black p-8 md:p-16 font-sans">
-      <div className="max-w-5xl mx-auto">
+    <div
+      className="min-h-screen text-[#f5f2ee]"
+      style={{
+        backgroundColor: '#080808',
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      {/* Grain */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundSize: '200px',
+          opacity: 0.035,
+        }}
+      />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-          <div>
-            <h1 className="text-4xl font-normal tracking-tight mb-2">Your Vault</h1>
-            <p className="text-gray-500">Manage your active circles and drops.</p>
+      {/* Ambient glow */}
+      <div
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-72 pointer-events-none z-0"
+        style={{
+          background: `radial-gradient(ellipse at top, ${accent}14 0%, transparent 70%)`,
+        }}
+      />
+
+      <div className="relative z-10 max-w-2xl mx-auto px-6">
+
+        {/* Artist header */}
+        <div className="pt-16 pb-12">
+
+          {/* Avatar + name row */}
+          <div className="flex items-start gap-5 mb-8">
+            <div
+              className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center text-2xl font-bold"
+              style={{
+                backgroundColor: `${accent}18`,
+                color: accent,
+                fontFamily: "'DM Serif Display', serif",
+              }}
+            >
+              {artist.name[0].toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0 pt-1">
+              <h1
+                className="text-3xl md:text-4xl font-normal tracking-tight leading-none mb-1.5 text-[#f5f2ee]"
+                style={{ fontFamily: "'DM Serif Display', serif" }}
+              >
+                {artist.name}
+              </h1>
+              <p className="text-xs font-mono" style={{ color: `${accent}60` }}>
+                @{artist.handle}
+                {artist.city && (
+                  <span className="text-[#f5f2ee]/20 ml-2">· {artist.city}</span>
+                )}
+                {artist.genre && (
+                  <span className="text-[#f5f2ee]/20 ml-2">· {artist.genre}</span>
+                )}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/stats"
-              className="border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
-            >
-              Stats
-            </Link>
-            <Link
-              href="/dashboard/profile"
-              className="border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
-            >
-              Profile
-            </Link>
-            <Link
-              href="/dashboard/circles/create"
-              className="bg-black text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm"
-            >
-              <span>+</span> Drop a Circle
-            </Link>
-          </div>
+
+          {/* Bio */}
+          {artist.bio && (
+            <p className="text-sm text-[#f5f2ee]/50 leading-relaxed max-w-lg mb-6">
+              {artist.bio}
+            </p>
+          )}
+
+          {/* Social links */}
+          {socialLinks.length > 0 && (
+            <div className="flex items-center gap-5">
+              {socialLinks.map(({ href, label }) => (
+                <a
+                  key={label}
+                  href={href!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] uppercase tracking-[0.2em] font-mono transition-colors"
+                  style={{ color: `${accent}50` }}
+                  onMouseEnter={e =>
+                    ((e.currentTarget as HTMLElement).style.color = accent)
+                  }
+                  onMouseLeave={e =>
+                    ((e.currentTarget as HTMLElement).style.color = `${accent}50`)
+                  }
+                >
+                  {label} ↗
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Divider */}
+          <div
+            className="mt-10 h-px"
+            style={{ backgroundColor: `${accent}12` }}
+          />
         </div>
 
-        {circles && circles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {circles.map((circle) => {
-              const hasExpired = circle.expires_at && new Date(circle.expires_at) < new Date();
-              const isLocked = !circle.is_active || hasExpired;
+        {/* Drops */}
+        <div className="pb-20">
+          {drops.length > 0 ? (
+            <DropsGrid circles={drops} accent={accent} handle={handle} />
+          ) : (
+            <div className="text-center py-24">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 text-2xl"
+                style={{
+                  backgroundColor: `${accent}08`,
+                  border: `1px solid ${accent}18`,
+                  color: `${accent}30`,
+                }}
+              >
+                ○
+              </div>
+              <h3
+                className="text-xl font-normal mb-2"
+                style={{
+                  fontFamily: "'DM Serif Display', serif",
+                  color: `${accent}50`,
+                }}
+              >
+                Nothing dropped yet.
+              </h3>
+              <p className="text-sm text-[#f5f2ee]/20">
+                Check back soon.
+              </p>
+            </div>
+          )}
+        </div>
 
-              return (
-                <div
-                  key={circle.id}
-                  className={`bg-white border ${isLocked ? 'border-red-100 opacity-75' : 'border-gray-200'} rounded-xl p-6 hover:shadow-sm transition-all flex flex-col h-full relative overflow-hidden`}
-                >
-                  <div className="flex-grow z-10">
-                    <div className="flex justify-between items-start mb-4 gap-4">
-                      <h2 className="text-xl font-medium tracking-tight line-clamp-2">{circle.title}</h2>
-                      <span className="bg-gray-100 text-gray-900 text-xs font-mono px-2 py-1 rounded">
-                        ${(circle.price / 100).toFixed(2)}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-sm line-clamp-3 mb-6">{circle.description}</p>
-                  </div>
+        {/* Footer */}
+        <div
+          className="border-t py-8 flex items-center justify-between"
+          style={{ borderColor: '#f5f2ee08' }}
+        >
+          <a
+            href="/"
+            className="text-[9px] uppercase tracking-[0.3em] font-mono text-[#f5f2ee]/12 hover:text-[#f5f2ee]/35 transition-colors"
+          >
+            DropCircles
+          </a>
+          <p className="text-[9px] font-mono text-[#f5f2ee]/10">
+            Pre-release. Direct.
+          </p>
+        </div>
 
-                  <div className="pt-4 border-t border-gray-100 flex flex-col gap-4 mt-auto z-10">
-                    <div className="flex justify-between items-center">
-                      <span className={`text-xs uppercase tracking-widest font-medium ${isLocked ? 'text-red-500' : 'text-[#00c2d4]'}`}>
-                        {hasExpired ? 'Expired' : (!circle.is_active ? 'Locked' : 'Active')}
-                      </span>
-                      <div className="flex items-center gap-4">
-                        <Link
-                          href={`/dashboard/circles/${circle.id}`}
-                          className="text-[10px] uppercase tracking-widest text-gray-500 hover:text-black transition-colors font-bold underline"
-                        >
-                          EDIT ↗
-                        </Link>
-                        {!circle.expires_at && circle.is_active && (
-                          <button
-                            onClick={() => triggerSelfDestruct(circle.id)}
-                            className="text-[10px] bg-red-50 text-red-600 px-2 py-1 rounded uppercase tracking-widest hover:bg-red-100 transition-colors"
-                          >
-                            Set 24h Drop
-                          </button>
-                        )}
-                        {circle.expires_at && !hasExpired && (
-                          <span className="text-[10px] text-gray-400 uppercase tracking-widest">Ends soon</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                      <span className="text-xs text-gray-500 font-medium">Public Access</span>
-                      <button
-                        onClick={() => toggleActiveStatus(circle.id, circle.is_active)}
-                        className={`w-11 h-6 rounded-full transition-colors relative ${circle.is_active ? 'bg-black' : 'bg-gray-200'}`}
-                      >
-                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${circle.is_active ? 'translate-x-5' : 'translate-x-0'}`} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-24 border border-dashed border-gray-300 rounded-xl bg-white">
-            <h3 className="text-lg font-medium mb-2">Your vault is empty</h3>
-            <p className="text-gray-500 mb-6 text-sm">You haven't dropped any circles yet.</p>
-            <Link
-              href="/dashboard/circles/create"
-              className="text-black underline text-sm hover:text-gray-600 transition-colors"
-            >
-              Create your first drop
-            </Link>
-          </div>
-        )}
       </div>
     </div>
-  );
+  )
 }
