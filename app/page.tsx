@@ -72,6 +72,7 @@ export default function Home() {
         .sb-sub{font-size:12px;color:rgba(245,242,238,0.4);font-weight:300;line-height:1.7;margin-bottom:16px;}
         .sb-line{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);}
         .footer{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;white-space:nowrap;}
+@media(max-width:768px){.footer{position:relative;bottom:auto;left:auto;transform:none;margin-top:24px;justify-content:center;}}
         .footer-link{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,242,238,0.2);cursor:pointer;transition:color 0.2s;text-decoration:none;background:none;border:none;padding:0;}
         .footer-link:hover{color:rgba(245,242,238,0.55);}
         .footer-sep{width:1px;height:10px;background:rgba(245,242,238,0.1);}
