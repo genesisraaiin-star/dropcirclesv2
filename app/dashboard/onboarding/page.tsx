@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase' // 👈 Using the Next.js-aware client!
 
 export default function Onboarding() {
   const router = useRouter()
@@ -20,11 +21,9 @@ export default function Onboarding() {
     if (!form.name.trim()) { setError('Artist name is required.'); return }
     setLoading(true)
     try {
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      // 👈 Simply call your pre-configured client
+      const supabase = createClient()
+      
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/signin'); return }
 
@@ -44,16 +43,12 @@ export default function Onboarding() {
     setLoading(false)
   }
 
-  // NEW FUNCTION: Calls our deployed Edge Function to get the Stripe URL
   async function handleStripeConnect() {
     setStripeLoading(true)
     setError('')
     try {
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      // 👈 Use the same pre-configured client here
+      const supabase = createClient()
       
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/signin'); return }
