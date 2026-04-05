@@ -10,10 +10,11 @@ export default function About() {
         html{background:#080808;}
         body{background-color:var(--black);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
         .grain{background-color:var(--black);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+        @keyframes corePulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
         .nav{display:flex;justify-content:space-between;align-items:center;padding:24px 60px;border-bottom:1px solid var(--line);}
-        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-        .wordmark{font-family:var(--sans);font-weight:300;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--white);opacity:0.5;}
-        .nav-back{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,242,238,0.3);text-decoration:none;transition:color 0.2s;border:none;background:none;padding:0;cursor:pointer;}
+        .nav-logo{display:flex;align-items:center;gap:14px;text-decoration:none;}
+        .wordmark{font-family:var(--sans);font-weight:300;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--white);opacity:0.5;}
+        .nav-back{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,242,238,0.3);text-decoration:none;transition:color 0.2s;}
         .nav-back:hover{color:rgba(245,242,238,0.7);}
         .hero{padding:72px 60px 64px;border-bottom:1px solid var(--line);}
         .hero-label{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
@@ -38,16 +39,14 @@ export default function About() {
         .col-hed{font-family:var(--serif);font-size:clamp(28px,4vw,48px);line-height:1.0;letter-spacing:-0.5px;color:#0a0a0a;margin-bottom:10px;}
         .col-hed em{font-style:italic;color:#0a0a0a;}
         .col-sub{font-size:14px;color:var(--ink2);font-weight:300;line-height:1.75;max-width:400px;margin-bottom:28px;}
-        .cta-wrap{display:flex;flex-direction:column;gap:10px;max-width:400px;}
-        .cta-btn{padding:13px 24px;background:#0a0a0a;color:var(--off);border:none;font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s;border-radius:2px;}
+        .cta-btn{padding:13px 24px;background:#0a0a0a;color:var(--off);border:none;font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-flex;justify-content:space-between;align-items:center;gap:40px;transition:background 0.15s;border-radius:2px;max-width:400px;width:100%;}
         .cta-btn:hover{background:#1a1a1a;}
-        .cta-btn .arrow{display:inline-block;transition:transform 0.2s ease;}
+        .arrow{display:inline-block;transition:transform 0.2s ease;}
         .cta-btn:hover .arrow{transform:translateX(4px);}
         .sec-label{font-family:var(--mono);font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--linelt);width:100%;max-width:260px;}
         .circle-vis{position:relative;width:200px;height:200px;margin:0 auto 20px;}
         .ring{position:absolute;border-radius:50%;border:1px solid;}
         @keyframes slowSpin{100%{transform:rotate(360deg);}}
-        @keyframes corePulse{0%,100%{box-shadow:0 0 0px rgba(0,194,212,0),inset 0 0 0px rgba(0,194,212,0);}33%{box-shadow:0 0 14px rgba(0,194,212,0.45),inset 0 0 4px rgba(0,194,212,0.2);}}
         @media(prefers-reduced-motion:no-preference){.r1{animation:slowSpin 9s linear infinite;}.r2{animation:slowSpin 6s linear infinite reverse;}}
         .r1{width:200px;height:200px;top:0;left:0;border-color:rgba(10,10,10,0.14);}
         .r2{width:134px;height:134px;top:33px;left:33px;border-color:rgba(10,10,10,0.28);}
@@ -101,15 +100,16 @@ export default function About() {
           .col-r{padding:36px 24px;align-items:flex-start;}
           .sec-label,.tier-rows,.geo-tease{max-width:100%;}
           .compare{padding:0 24px 40px;}
-          .cta-wrap{max-width:100%;}
+          .cta-btn{max-width:100%;}
         }
       `}</style>
 
       <nav className="nav grain">
-        <Link href="/" className="nav-logo" style={{textDecoration:'none',display:'flex',alignItems:'center',gap:10}}>
-          <svg width="32" height="20" viewBox="0 0 32 20" fill="none" aria-hidden="true">
-            <circle cx="10" cy="10" r="9" stroke="rgba(245,242,238,0.5)" strokeWidth="1"/>
-            <circle cx="22" cy="10" r="9" stroke="rgba(245,242,238,0.5)" strokeWidth="1"/>
+        <Link href="/" className="nav-logo">
+          <svg width="40" height="26" viewBox="0 0 40 26" fill="none">
+            <circle cx="14" cy="13" r="12" stroke="rgba(245,242,238,0.6)" strokeWidth="1"/>
+            <circle cx="26" cy="13" r="12" stroke="rgba(245,242,238,0.6)" strokeWidth="1"/>
+            <circle cx="20" cy="13" r="2.5" fill="#00c2d4" style={{animation:'corePulse 3s ease-in-out infinite'}}/>
           </svg>
           <span className="wordmark">DropCircles</span>
         </Link>
@@ -157,12 +157,10 @@ export default function About() {
           <div className="col-l">
             <h2 className="col-hed">Your music,<br/><em>their ears,</em><br/>first.</h2>
             <p className="col-sub">Every platform between you and your fan is a toll booth. DropCircles removes the toll. Your superfans pay you directly. Pure, unfiltered patronage.</p>
-            <div className="cta-wrap">
-              <Link href="/" className="cta-btn">
-                <span>Request vault access</span>
-                <span className="arrow">→</span>
-              </Link>
-            </div>
+            <Link href="/" className="cta-btn">
+              <span>Request vault access</span>
+              <span className="arrow">→</span>
+            </Link>
           </div>
           <div className="col-r">
             <div className="sec-label">The circle structure</div>
@@ -186,7 +184,6 @@ export default function About() {
             </div>
           </div>
         </div>
-
         <div className="compare">
           <div className="compare-label">Platform comparison — what you actually keep per $1 earned</div>
           <div className="table-outer">
