@@ -2,13 +2,15 @@ import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase-server'
 import { DropsGrid, ErrorBanner } from './drops-grid'
 
-export const revalidate = 30 // revalidate every 30s
+export const revalidate = 30
 
-type Props = { params: Promise<{ handle: string }>; searchParams: Promise<{ error?: string }> }
+type Props = {
+  params: Promise<{ handle: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 export async function generateMetadata({ params }: Props) {
   const { handle } = await params
-  const { error } = await searchParams
   const supabase = createServiceClient()
   const { data: artist } = await supabase
     .from('artists')
@@ -25,10 +27,11 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function StorefrontPage({ params, searchParams }: Props) {
   const { handle } = await params
-  const { error } = await searchParams
+  const sp = await searchParams
+  const error = typeof sp.error === 'string' ? sp.error : undefined
+
   const supabase = createServiceClient()
 
-  // Fetch artist
   const { data: artist } = await supabase
     .from('artists')
     .select('id, name, handle, bio, genre, city, accent_color, instagram, twitter, spotify, website')
@@ -37,7 +40,6 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
 
   if (!artist) notFound()
 
-  // Fetch active circles only — filter expired server-side too
   const now = new Date().toISOString()
   const { data: circles } = await supabase
     .from('circles')
@@ -60,12 +62,8 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
   return (
     <div
       className="min-h-screen text-[#f5f2ee]"
-      style={{
-        backgroundColor: '#080808',
-        fontFamily: "'DM Sans', sans-serif",
-      }}
+      style={{ backgroundColor: '#080808', fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* Grain */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -74,21 +72,13 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
           opacity: 0.035,
         }}
       />
-
-      {/* Ambient glow */}
       <div
         className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-72 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(ellipse at top, ${accent}14 0%, transparent 70%)`,
-        }}
+        style={{ background: `radial-gradient(ellipse at top, ${accent}14 0%, transparent 70%)` }}
       />
 
       <div className="relative z-10 max-w-2xl mx-auto px-6">
-
-        {/* Artist header */}
         <div className="pt-16 pb-12">
-
-          {/* Avatar + name row */}
           <div className="flex items-start gap-5 mb-8">
             <div
               className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center text-2xl font-bold"
@@ -109,24 +99,16 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
               </h1>
               <p className="text-xs font-mono" style={{ color: `${accent}60` }}>
                 @{artist.handle}
-                {artist.city && (
-                  <span className="text-[#f5f2ee]/20 ml-2">· {artist.city}</span>
-                )}
-                {artist.genre && (
-                  <span className="text-[#f5f2ee]/20 ml-2">· {artist.genre}</span>
-                )}
+                {artist.city && <span className="text-[#f5f2ee]/20 ml-2">· {artist.city}</span>}
+                {artist.genre && <span className="text-[#f5f2ee]/20 ml-2">· {artist.genre}</span>}
               </p>
             </div>
           </div>
 
-          {/* Bio */}
           {artist.bio && (
-            <p className="text-sm text-[#f5f2ee]/50 leading-relaxed max-w-lg mb-6">
-              {artist.bio}
-            </p>
+            <p className="text-sm text-[#f5f2ee]/50 leading-relaxed max-w-lg mb-6">{artist.bio}</p>
           )}
 
-          {/* Social links */}
           {socialLinks.length > 0 && (
             <div className="flex items-center gap-5">
               {socialLinks.map(({ href, label }) => (
@@ -137,12 +119,6 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
                   rel="noopener noreferrer"
                   className="text-[10px] uppercase tracking-[0.2em] font-mono transition-colors"
                   style={{ color: `${accent}50` }}
-                  onMouseEnter={e =>
-                    ((e.currentTarget as HTMLElement).style.color = accent)
-                  }
-                  onMouseLeave={e =>
-                    ((e.currentTarget as HTMLElement).style.color = `${accent}50`)
-                  }
                 >
                   {label} ↗
                 </a>
@@ -150,14 +126,9 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
             </div>
           )}
 
-          {/* Divider */}
-          <div
-            className="mt-10 h-px"
-            style={{ backgroundColor: `${accent}12` }}
-          />
+          <div className="mt-10 h-px" style={{ backgroundColor: `${accent}12` }} />
         </div>
 
-        {/* Drops */}
         <div className="pb-20">
           {error && <ErrorBanner error={error} />}
           {drops.length > 0 ? (
@@ -166,46 +137,27 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
             <div className="text-center py-24">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 text-2xl"
-                style={{
-                  backgroundColor: `${accent}08`,
-                  border: `1px solid ${accent}18`,
-                  color: `${accent}30`,
-                }}
+                style={{ backgroundColor: `${accent}08`, border: `1px solid ${accent}18`, color: `${accent}30` }}
               >
                 ○
               </div>
               <h3
                 className="text-xl font-normal mb-2"
-                style={{
-                  fontFamily: "'DM Serif Display', serif",
-                  color: `${accent}50`,
-                }}
+                style={{ fontFamily: "'DM Serif Display', serif", color: `${accent}50` }}
               >
                 Nothing dropped yet.
               </h3>
-              <p className="text-sm text-[#f5f2ee]/20">
-                Check back soon.
-              </p>
+              <p className="text-sm text-[#f5f2ee]/20">Check back soon.</p>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div
-          className="border-t py-8 flex items-center justify-between"
-          style={{ borderColor: '#f5f2ee08' }}
-        >
-          <a
-            href="/"
-            className="text-[9px] uppercase tracking-[0.3em] font-mono text-[#f5f2ee]/12 hover:text-[#f5f2ee]/35 transition-colors"
-          >
+        <div className="border-t py-8 flex items-center justify-between" style={{ borderColor: '#f5f2ee08' }}>
+          <a href="/" className="text-[9px] uppercase tracking-[0.3em] font-mono text-[#f5f2ee]/12 hover:text-[#f5f2ee]/35 transition-colors">
             DropCircles
           </a>
-          <p className="text-[9px] font-mono text-[#f5f2ee]/10">
-            Pre-release. Direct.
-          </p>
+          <p className="text-[9px] font-mono text-[#f5f2ee]/10">Pre-release. Direct.</p>
         </div>
-
       </div>
     </div>
   )
