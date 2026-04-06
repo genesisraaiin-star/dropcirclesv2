@@ -7,6 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL!
+const PLATFORM_ACCOUNT_ID = process.env.STRIPE_PLATFORM_ACCOUNT_ID ?? ''
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -44,49 +45,50 @@ export async function GET(request: NextRequest) {
 
   const priceInCents = circle.price
   const platformFee = Math.round(priceInCents * 0.05)
+  const artistAccountId: string = artist?.stripe_account_id ?? ''
+  const isConnectedAccount = artistAccountId && artistAccountId !== PLATFORM_ACCOUNT_ID
 
-  // Determine if artist has a connected (non-platform) Stripe account
-  const artistAccountId = artist?.stripe_account_id
-  const isConnectedAccount =
-    artistAccountId &&
-    artistAccountId !== process.env.STRIPE_PLATFORM_ACCOUNT_ID
-
-  let sessionParams: Stripe.Checkout.SessionCreateParams = {
-    mode: 'payment',
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: 'usd',
-          unit_amount: priceInCents,
-          product_data: {
-            name: circle.title,
-            description: 'Unlock access · DropCircles',
-          },
+  // Build line items
+  const lineItems = [
+    {
+      quantity: 1,
+      price_data: {
+        currency: 'usd' as const,
+        unit_amount: priceInCents,
+        product_data: {
+          name: circle.title,
+          description: 'Unlock access · DropCircles',
         },
       },
-    ],
-    metadata: {
-      circle_id: circle.id,
-      artist_id: artist?.id ?? '',
-      handle,
     },
-    customer_creation: 'always',
-    success_url: `${APP_URL}/${handle}/live/${circle.id}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL}/${handle}`,
-  }
-
-  // Only add Connect transfer if artist has a real connected account
-  if (isConnectedAccount) {
-    sessionParams.payment_intent_data = {
-      application_fee_amount: platformFee,
-      transfer_data: { destination: artistAccountId },
-    }
-  }
+  ]
 
   let session: Stripe.Checkout.Session
   try {
-    session = await stripe.checkout.sessions.create(sessionParams)
+    if (isConnectedAccount) {
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        line_items: lineItems,
+        payment_intent_data: {
+          application_fee_amount: platformFee,
+          transfer_data: { destination: artistAccountId },
+        },
+        metadata: { circle_id: circle.id, artist_id: artist?.id ?? '', handle },
+        customer_creation: 'always',
+        success_url: `${APP_URL}/${handle}/live/${circle.id}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${APP_URL}/${handle}`,
+      })
+    } else {
+      // Testing mode — no Connect transfer
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        line_items: lineItems,
+        metadata: { circle_id: circle.id, artist_id: artist?.id ?? '', handle },
+        customer_creation: 'always',
+        success_url: `${APP_URL}/${handle}/live/${circle.id}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${APP_URL}/${handle}`,
+      })
+    }
   } catch (err: any) {
     console.error('Stripe session creation failed:', err.message)
     return NextResponse.redirect(`${APP_URL}/${handle}?error=checkout_failed`)
