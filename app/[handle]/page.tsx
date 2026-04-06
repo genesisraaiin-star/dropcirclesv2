@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase-server'
-import { DropsGrid } from './drops-grid'
+import { DropsGrid, ErrorBanner } from './drops-grid'
 
 export const revalidate = 30 // revalidate every 30s
 
-type Props = { params: Promise<{ handle: string }> }
+type Props = { params: Promise<{ handle: string }>; searchParams: Promise<{ error?: string }> }
 
 export async function generateMetadata({ params }: Props) {
   const { handle } = await params
+  const { error } = await searchParams
   const supabase = createServiceClient()
   const { data: artist } = await supabase
     .from('artists')
@@ -22,8 +23,9 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
-export default async function StorefrontPage({ params }: Props) {
+export default async function StorefrontPage({ params, searchParams }: Props) {
   const { handle } = await params
+  const { error } = await searchParams
   const supabase = createServiceClient()
 
   // Fetch artist
@@ -157,6 +159,7 @@ export default async function StorefrontPage({ params }: Props) {
 
         {/* Drops */}
         <div className="pb-20">
+          {error && <ErrorBanner error={error} />}
           {drops.length > 0 ? (
             <DropsGrid circles={drops} accent={accent} handle={handle} />
           ) : (

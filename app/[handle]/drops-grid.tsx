@@ -245,3 +245,30 @@ export function DropsGrid({
     </div>
   )
 }
+
+// Error banner shown when Stripe redirects back with ?error=
+export function ErrorBanner({ error }: { error: string }) {
+  const messages: Record<string, string> = {
+    drop_expired: 'This drop has expired.',
+    drop_inactive: 'This drop is no longer active.',
+    drop_not_found: 'Drop not found.',
+    payments_unavailable: 'This artist hasn\'t set up payments yet.',
+    checkout_failed: 'Checkout failed. Please try again.',
+    missing_params: 'Something went wrong. Please try again.',
+  }
+
+  const msg = messages[error] || 'Something went wrong.'
+
+  return (
+    <div
+      className="rounded-xl border px-5 py-4 mb-6 text-sm font-mono text-center"
+      style={{
+        borderColor: '#f9731630',
+        backgroundColor: '#f9731608',
+        color: '#f97316',
+      }}
+    >
+      {msg}
+    </div>
+  )
+}
